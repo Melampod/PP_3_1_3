@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>Create user</title>
+</head>
+<body>
+<h2>User info</h2>
+<br>
+
+<form name="frm" action="#" th:action="@{/admin/saveUser}" th:object="${user}" method="post">
+
+    <input type="hidden" th:value="${user.id}" th:attr=" name='id'"/>
+
+    <label for="username">Username</label>
+    <input type="text" th:field="*{username}" id="username" placeholder="Username">
+    <p th:if="${#fields.hasErrors('username')}" th:errors="*{username}">Incorrect username</p>
+
+    <label th:text="${notUnique}"></label>
+
+
+    <label for="password">Password</label>
+    <input type="password"  th:field="*{password}" id="password" placeholder="Password">
+    <p th:if="${#fields.hasErrors('password')}" th:errors="*{password}">Incorrect password</p>
+
+    <label for="age">Age</label>
+    <input type="text" th:field="*{age}" id="age" placeholder="Age">
+    <p th:if="${#fields.hasErrors('age')}" th:errors="*{age}">Incorrect age</p>
+
+    <label for="email">Email</label>
+    <input type="text" th:field="*{email}" id="email" placeholder="Email">
+
+    <br><br>
+    <label for="roles.id">Role</label>
+            <th:block th:each="role : ${roles}">
+                <br>
+                <input type="checkbox" name="rolees" th:value="${role.name}" id="roles.id"/>
+                <label th:text="${role.name}"></label>
+            </th:block>
+    <br><br>
+    <button id = "btn" disabled type="submit">Save user</button>
+    <script>
+        let checkbox = document.getElementsByName("rolees");
+        let button = document.getElementById("btn");
+        for (let i = 0; i < checkbox.length; i++) {
+
+            checkbox[i].addEventListener( "change", () => {
+                button.disabled = true;
+
+                for (let i = 0; i < checkbox.length; i++) {
+                    if ( checkbox[i].checked == true )
+                        button.disabled = false;
+                }
+            });
+        }
+    </script>
+<br><br>
+</form>
+</body>

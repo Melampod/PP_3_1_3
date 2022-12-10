@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="https://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Your info</title>
+</head>
+<body>
+Your personal ID:   <div th:text="${user.id}" ></div>
+<br>
+Your username:   <div th:text="${user.username}" ></div>
+<br>
+Your age:  <div th:text="${user.age}" ></div>
+<br>
+Your email:  <div th:text="${user.email}" ></div>
+<br>
+Your roles: <div th:each="role : ${user.roles}">
+    <div th:text="${role.name}"></div>
+</div>
+<br>
+</body>
+</html>

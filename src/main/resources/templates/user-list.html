@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>Users</title>
+    <style>
+        table, th, td {
+            border: 1px solid black;
+            border-collapse: collapse;
+        }
+    </style>
+</head>
+<body>
+<div th:switch="${usersList}">
+    <h2 th:case="null">No users found</h2>
+    <div th:case="*">
+        <h2>Users</h2>
+        <table>
+            <thead>
+            <tr>
+                <th>Id</th>
+                <th>Username</th>
+                <th>Age</th>
+                <th>Email</th>
+                <th>Roles</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="user : ${usersList}">
+                <td th:text="${user.id}"></td>
+                <td th:text="${user.username}"></td>
+                <td th:text="${user.age}"></td>
+                <td th:text="${user.email}"></td>
+                <td>
+            <a th:each="role: ${user.roles}">
+                <p th:text="${role.name}"></p>
+            </a>
+                </td>
+                <td><a th:href="@{admin/updateUser/{id}(id=${user.id})}">Edit</a></td>
+                <td><a th:href="@{admin/deleteUser/{id}(id=${user.id})}">Delete</a></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <p><a href="/admin/addUser">Add user</a></p>
+    <br><br>
+    <h2 th:text="${lastAdmin}"></h2>
+</div>
+</body>
+</html>

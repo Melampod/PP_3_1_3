@@ -19,7 +19,7 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public List<User> findAllUsers() {
-        List<User> usersList = entityManager.createQuery("from User", User.class)
+        List<User> usersList = entityManager.createQuery("select distinct u from User u join fetch u.roles", User.class)
                 .getResultList();
         if (usersList.isEmpty()) return null;
         return usersList;
@@ -33,7 +33,11 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public User findUserById(Long id) {
-        User user = entityManager.find(User.class, id);
+        // User user = entityManager.find(User.class, id);
+        User user = entityManager.createQuery("select u from User u join fetch u.roles where u.id =:id", User.class)
+                .setParameter("id", id)
+                .getResultList()
+                .stream().findFirst().orElse(null);
         return user;
     }
 
@@ -50,21 +54,20 @@ public class UserDaoImpl implements UserDao {
     @Override
     public boolean deleteUser(Long id) {
         User user = entityManager.find(User.class, id);
-
-        Set<Role> roles = user.getRoles();
-        List<User> usersList = new ArrayList<>();
-        for (Role role : roles) {
-            if (role.getName().equals("ROLE_ADMIN")) {
-                usersList = entityManager.
-                        createQuery("select u from User u join fetch u.roles as r where r.id =:roleAdminId", User.class)
-                        .setParameter("roleAdminId", 1L)
-                        .getResultList();
-                if (usersList.size() == 1) {
-                    return false;
-                }
-            }
+        if (user.isAdmin()
+                && numOfAdminRole() == 1) {
+            return false;
         }
         entityManager.remove(user);
         return true;
+    }
+
+    @Override
+    public int numOfAdminRole() {
+        List<User> usersList = entityManager
+                .createQuery("select u from User u join fetch u.roles as r where r.id =:roleAdminId", User.class)
+                .setParameter("roleAdminId", 1L)
+                .getResultList();
+        return usersList.size();
     }
 }

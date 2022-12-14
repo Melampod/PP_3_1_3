@@ -13,4 +13,5 @@ public interface UserService extends UserDetailsService {
     User findUserByUsername(String username);
     boolean deleteUser(Long id);
     User loadUserByUsername(String username);
+    int numOfAdminRole();
 }

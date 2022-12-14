@@ -10,5 +10,6 @@ public interface UserDao {
     User findUserById(Long id);
     User findUserByUsername(String username);
     boolean deleteUser(Long id);
+    int numOfAdminRole();
 
 }

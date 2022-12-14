@@ -45,9 +45,10 @@ public class User implements UserDetails {
     )
     private Set<Role> roles;
 
-    public User(){
+    public User() {
 
     }
+
     public User(String username, String password, int age, String email, Set<Role> roles) {
         this.username = username;
         this.password = password;
@@ -56,9 +57,20 @@ public class User implements UserDetails {
         this.roles = roles;
     }
 
+    public boolean isAdmin() {
+        if (roles == null) return false;
+        return roles.stream().anyMatch(r -> r.getName().equals("ROLE_ADMIN"));
+    }
+    public boolean isUser() {
+        if (roles == null) return false;
+        return roles.stream().anyMatch(r -> r.getName().equals("ROLE_USER"));
+    }
+
+
     public int getAge() {
         return age;
     }
+
     public void setAge(int age) {
         this.age = age;
     }
@@ -66,6 +78,7 @@ public class User implements UserDetails {
     public Set<Role> getRoles() {
         return roles;
     }
+
     public void setRoles(Set<Role> roles) {
         this.roles = roles;
     }
@@ -73,6 +86,7 @@ public class User implements UserDetails {
     public Long getId() {
         return id;
     }
+
     public void setId(Long id) {
         this.id = id;
     }
@@ -80,6 +94,7 @@ public class User implements UserDetails {
     public String getUsername() {
         return username;
     }
+
     public void setUsername(String username) {
         this.username = username;
     }
@@ -87,6 +102,7 @@ public class User implements UserDetails {
     public String getPassword() {
         return password;
     }
+
     public void setPassword(String password) {
         this.password = password;
     }
@@ -94,6 +110,7 @@ public class User implements UserDetails {
     public String getEmail() {
         return email;
     }
+
     public void setEmail(String email) {
         this.email = email;
     }
@@ -102,14 +119,17 @@ public class User implements UserDetails {
     public boolean isAccountNonExpired() {
         return true;
     }
+
     @Override
     public boolean isAccountNonLocked() {
         return true;
     }
+
     @Override
     public boolean isCredentialsNonExpired() {
         return true;
     }
+
     @Override
     public boolean isEnabled() {
         return true;

@@ -13,7 +13,7 @@
 <body>
 <div th:switch="${usersList}">
     <h2 th:case="null">No users found</h2>
-    <div th:case="*">
+    <td th:case="*">
         <h2>Users</h2>
         <table>
             <thead>
@@ -32,19 +32,22 @@
                 <td th:text="${user.age}"></td>
                 <td th:text="${user.email}"></td>
                 <td>
-            <a th:each="role: ${user.roles}">
-                <p th:text="${role.name}"></p>
-            </a>
+                    <a th:each="role: ${user.roles}">
+                        <p th:text="${role.name}"></p>
+                    </a>
                 </td>
                 <td><a th:href="@{admin/updateUser/{id}(id=${user.id})}">Edit</a></td>
-                <td><a th:href="@{admin/deleteUser/{id}(id=${user.id})}">Delete</a></td>
+
+                <td th:switch="${user.isAdmin() and numOfAdmin == 1}">
+                    <p th:case="${true}"><a>Cant delete last<br /> admin from DataBase</a></p>
+                    <p th:case="*"><a th:href="@{admin/deleteUser/{id}(id=${user.id})}">Delete</a></p>
+                </td>
             </tr>
             </tbody>
         </table>
-    </div>
-    <p><a href="/admin/addUser">Add user</a></p>
-    <br><br>
-    <h2 th:text="${lastAdmin}"></h2>
+</div>
+<p><a href="/admin/addUser">Add user</a></p>
+<br><br>
 </div>
 </body>
 </html>

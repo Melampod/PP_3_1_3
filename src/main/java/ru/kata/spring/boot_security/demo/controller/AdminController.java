@@ -12,7 +12,7 @@ import ru.kata.spring.boot_security.demo.service.UserService;
 
 import javax.validation.Valid;
 import java.security.Principal;
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -23,7 +23,6 @@ public class AdminController {
 
     private final UserService userService;
     private final RoleService roleService;
-    private static boolean flagNotLastAdmin = true; // для проверки перед удалением, что остался не последний пользователь с ролью admin
 
     @Autowired
     public AdminController(UserService userService, RoleService roleService) {
@@ -34,17 +33,8 @@ public class AdminController {
     @GetMapping
     public String showAllUsers(Model model) {
         List<User> usersList = userService.findAllUsers();
-
-        List<User> userList2 = new ArrayList<>(); // чтобы выводились роли (из-за ленивой инициализации)
-        for (User user : usersList) {
-            userList2.add(userService.findUserByUsername(user.getUsername()));
-        }
-        model.addAttribute("usersList", userList2);
-
-        if (flagNotLastAdmin == false) {
-            model.addAttribute("lastAdmin", "Cant delete last admin from DataBase");
-        }
-        flagNotLastAdmin = true;
+        model.addAttribute("usersList", usersList);
+        model.addAttribute("numOfAdmin", userService.numOfAdminRole()); // чтобы не выводить кнопку Delete во view
         return "user-list";
     }
 
@@ -52,6 +42,8 @@ public class AdminController {
     public String addNewUser(Model model) {
         User user = new User();
         model.addAttribute("user", user);
+        System.out.println(user);
+        System.out.println(roleService.findAllRoles());
         model.addAttribute("roles", roleService.findAllRoles());
         return "user-info";
     }
@@ -59,33 +51,30 @@ public class AdminController {
     @PostMapping("/saveUser")
     public String saveUser(@Valid @ModelAttribute("user") User user,
                            BindingResult bindingResult,
-                           @RequestParam(value = "rolees", required = false) Set<Role> roles,
+                           @RequestParam(value = "rolees", required = false) Set<String> rolesNames,
                            Principal principal,
                            Model model) {
 
+        Set<Role> roles = new HashSet<>();
+       // User userFromWeb = userService.loadUserByUsername(principal.getName());
         User userFromBD = userService.loadUserByUsername(user.getUsername());
-        if (bindingResult.hasErrors() || (userFromBD != null && (userFromBD.getId() != user.getId()))) {
+        if (bindingResult.hasErrors()
+                || (userFromBD != null && (userFromBD.getId() != user.getId()))) {
             model.addAttribute("user", user);
             model.addAttribute("roles", roleService.findAllRoles());
             if (userFromBD != null && (userFromBD.getId() != user.getId())) {
                 model.addAttribute("notUnique", "Username is not unique!  ");
-            } else {
-                model.addAttribute("notUnique", "");
             }
             return "user-info";
         }
+
+        for (String roleName : rolesNames) {
+            roles.add(roleService.findRoleByName(roleName));}
         user.setRoles(roles);
-        for (Role role : roles) {
-            if (role.getName().equals("ROLE_ADMIN")) {
-                role.setId(1L);
-            } else if (role.getName().equals("ROLE_USER")) {
-                role.setId(2L);
-            }
-        }
         userService.saveUser(user);
 
         User userFromWeb = userService.loadUserByUsername(principal.getName());
-        if(userFromWeb == null) { // перезайти, если текущий пользователь изменил свой же username
+        if (userFromWeb == null || !userFromWeb.isAdmin()) { // перезайти, если текущий пользователь изменил свой же username, или снял с себя ROLE_ADMIN
             return "redirect:/login";
         }
         return "redirect:/admin";
@@ -97,14 +86,17 @@ public class AdminController {
         User user = userService.findUserById(id);
         model.addAttribute("user", user);
         model.addAttribute("roles", roleService.findAllRoles());
+        model.addAttribute("numOfAdmin", userService.numOfAdminRole()); // чтобы при изменении admin у него НЕ была забрана ROLE_ADMIN,
+        // если он последний admin в БД
+
         return "user-info";
     }
 
     @GetMapping("/deleteUser/{id}")
-    public String deleteUser(@PathVariable Long id, Model model, Principal principal) {
-        flagNotLastAdmin = userService.deleteUser(id);
+    public String deleteUser(@PathVariable Long id, Principal principal) {
+        userService.deleteUser(id);
         User userFromWeb = userService.loadUserByUsername(principal.getName());
-        if(userFromWeb == null) { // если удалил самого себя из бд, то выйти
+        if (userFromWeb == null) { // если удалил самого себя из бд, то выйти
             return "redirect:/login";
         }
         return "redirect:/admin";

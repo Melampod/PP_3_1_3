@@ -9,7 +9,7 @@
 <br>
 
 <form name="frm" action="#" th:action="@{/admin/saveUser}" th:object="${user}" method="post">
-
+    <input type="hidden" th:value="${numOfAdmin}" id="numOfAdmin2"/>
     <input type="hidden" th:value="${user.id}" th:attr=" name='id'"/>
 
     <label for="username">Username</label>
@@ -20,7 +20,7 @@
 
 
     <label for="password">Password</label>
-    <input type="password"  th:field="*{password}" id="password" placeholder="Password">
+    <input type="password" th:field="*{password}" id="password" placeholder="Password">
     <p th:if="${#fields.hasErrors('password')}" th:errors="*{password}">Incorrect password</p>
 
     <label for="age">Age</label>
@@ -31,29 +31,52 @@
     <input type="text" th:field="*{email}" id="email" placeholder="Email">
 
     <br><br>
-    <label for="roles.id">Role</label>
-            <th:block th:each="role : ${roles}">
-                <br>
-                <input type="checkbox" name="rolees" th:value="${role.name}" id="roles.id"/>
+    <label>Role</label>
+    <th:block th:each="role : ${roles}">
+        <br>
+        <div th:switch="${role.name}">
+            <p th:case="${'ROLE_ADMIN'}"><input type="checkbox" name="rolees" th:value="${role.name}"
+                                                id="roles_checkboxes1"
+                                                th:checked="${user.isAdmin()}">
+
                 <label th:text="${role.name}"></label>
-            </th:block>
+                <label th:if="${user.isAdmin() && numOfAdmin == 1}"
+                       th:text="'(Required for the last Admin in DataBase))'"></label>
+            </p>
+            <p th:case="${'ROLE_USER'}"><input type="checkbox" name="rolees" th:value="${role.name}"
+                                               id="roles_checkboxes2"
+                                               th:checked="${user.isUser()}">
+                <label th:text="${role.name}"></label></p>
+        </div>
+
+
+    </th:block>
     <br><br>
-    <button id = "btn" disabled type="submit">Save user</button>
+    <button id="btn" disabled type="submit">Save user</button>
     <script>
-        let checkbox = document.getElementsByName("rolees");
+        let numOfAdmin = ~~document.getElementById("numOfAdmin2").value;
+
         let button = document.getElementById("btn");
+        let checkbox = document.getElementsByName("rolees");
+        for (let i = 0; i < checkbox.length; i++) {
+            if (checkbox[i].checked === true)
+                button.disabled = false;
+        }
         for (let i = 0; i < checkbox.length; i++) {
 
-            checkbox[i].addEventListener( "change", () => {
+            checkbox[i].addEventListener("change", () => {
                 button.disabled = true;
 
                 for (let i = 0; i < checkbox.length; i++) {
-                    if ( checkbox[i].checked == true )
+                    if (checkbox[i].checked === true)
                         button.disabled = false;
+                }
+                if (checkbox[0].checked === false && numOfAdmin === 1) {
+                    button.disabled = true;
                 }
             });
         }
     </script>
-<br><br>
+    <br><br>
 </form>
 </body>

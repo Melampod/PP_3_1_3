@@ -42,8 +42,6 @@ public class AdminController {
     public String addNewUser(Model model) {
         User user = new User();
         model.addAttribute("user", user);
-        System.out.println(user);
-        System.out.println(roleService.findAllRoles());
         model.addAttribute("roles", roleService.findAllRoles());
         return "user-info";
     }
@@ -56,7 +54,6 @@ public class AdminController {
                            Model model) {
 
         Set<Role> roles = new HashSet<>();
-       // User userFromWeb = userService.loadUserByUsername(principal.getName());
         User userFromBD = userService.loadUserByUsername(user.getUsername());
         if (bindingResult.hasErrors()
                 || (userFromBD != null && (userFromBD.getId() != user.getId()))) {
@@ -92,7 +89,7 @@ public class AdminController {
         return "user-info";
     }
 
-    @GetMapping("/deleteUser/{id}")
+    @DeleteMapping("/deleteUser/{id}")
     public String deleteUser(@PathVariable Long id, Principal principal) {
         userService.deleteUser(id);
         User userFromWeb = userService.loadUserByUsername(principal.getName());

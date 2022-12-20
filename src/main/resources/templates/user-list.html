@@ -40,7 +40,14 @@
 
                 <td th:switch="${user.isAdmin() and numOfAdmin == 1}">
                     <p th:case="${true}"><a>Cant delete last<br /> admin from DataBase</a></p>
-                    <p th:case="*"><a th:href="@{admin/deleteUser/{id}(id=${user.id})}">Delete</a></p>
+<!--                    <p th:case="*"><a th:href="@{admin/deleteUser/{id}(id=${user.id})}" th:method="delete">Delete</a></p>-->
+                    <p th:case="*">
+                    <form action="#" th:action="@{admin/deleteUser/{id}(id=${user.id})}" th:method="delete" >
+                        <input type="hidden" name="_method" value="delete" />
+                        <button type="submit" id="submitButton" >Delete </button>
+                    </form>
+                    </p>
+
                 </td>
             </tr>
             </tbody>
